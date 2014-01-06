@@ -6,7 +6,7 @@ var mysql = require('mysql'),
 
 function connect(options) {
   return new RSVP.Promise(function (resolve) {
-    var connection = mysql.createPool(options);
+    var connection = mysql.createPool ? mysql.createPool(options) : mysql.createClient(options);
 
     // var params = [this.options.charset, this.options.collate];
     // connection.query('SET NAMES ? COLLATE ?', params, function (error) {
@@ -16,25 +16,6 @@ function connect(options) {
 
     return resolve(connection);
     // });
-  });
-}
-
-function setup(connection) {
-  return new RSVP.Promise(function (resolve, reject) {
-    var sql = '';
-    try {
-      sql = fs.readFileSync('./table.sql', 'utf8');
-    } catch (e) {
-      return reject(e);
-    }
-
-    connection.query(sql, function (error) {
-      if (error) {
-        return reject(error);
-      }
-
-      resolve(connection);
-    });
   });
 }
 
@@ -51,14 +32,15 @@ function query(connection) {
 }
 
 var options = {
-  'host': 'localhost',
-  'user': 'root',
-  'password': '',
-  'database': 'test',
+  'host': 'db.jsbin.com',
+  'user': '...', // hidden
+  'password': '...',
+  'database': 'jsbin',
   'charset': 'UTF8MB4'
 };
 
-connect(options).then(setup).then(query).then(function (result) {
+connect(options).then(query).then(function (result) {
+//console.log(mysql.PACKAGE.version);
   console.log(result);
 }, function (error) {
   console.error(error);
